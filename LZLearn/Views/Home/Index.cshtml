@@ -1,0 +1,37 @@
+﻿@*@model IEnumerable<LZLearn.Models.Noodles>*@
+
+@model LZLearn.ViewModels.HomeViewModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Index</h2>
+
+@*@foreach (var noodle in Model)
+    {
+        <div>
+            <h2>@noodle.Name</h2>
+            <h3>$ @noodle.Price</h3>
+            <p>@noodle.ShortDescription</p>
+        </div>
+    }*@
+
+@foreach (var noodle in Model.Noodels)
+{
+    <div>
+        <h2>@noodle.Name</h2>
+        <h3>$ @noodle.Price</h3>
+        <p>@noodle.ShortDescription</p>
+    </div>
+}
+
+<h2>评论</h2>
+@foreach (var feedback in Model.Feedbacks)
+{
+    <div>
+        <h2>@feedback.Name</h2>
+        <h3>$ @feedback.CreateDateUTC</h3>
+        <p>@feedback.Message</p>
+    </div>
+}

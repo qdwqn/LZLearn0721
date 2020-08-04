@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LZLearn.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -34,6 +35,18 @@ namespace LZLearn
         {
             //注入MVC服务
             services.AddMvc();
+            
+            //面条仓库注册
+            //法1：每次发起请求时，创建一个全新的面条仓库，请求结束后，自动注销该面条仓库
+            //优点：每次请求都会初始化一个全新的仓库，不同的请求之间，面条仓库完全独立，互不影响
+            services.AddTransient<INoodleRepository, MockNoodleRepository>();
+            services.AddTransient<IFeedbackRepository,MockFeedbackRepository>();
+            //法2：系统启动时，有且仅创建一个面条仓库，之后系统每处理请求，都会使用同一个面条仓库示例
+            //缺点：可能会造成数据污染，引发严重问题
+            //services.AddSingleton;
+            //法3：结合以上两种方法，引入事务，将一系列请求和操作整合在同一个事务Transaction中，
+            //仅创建一次示例，结束后注销
+            //services.AddScoped
 
         }
 
@@ -74,20 +87,33 @@ namespace LZLearn
                 app.UseDeveloperExceptionPage();
             }
 
+            #region 例
             //例：app.Map创建映射URL的中间件,并作短路处理
             /*
              * Map两个参数，第一个是URL字符串，第二个是是请求的处理对象Action
              * 第二个参数使用Lambda表达式来对请求进行处理
              */
-            app.Map("/test", build =>
-             {
-                 //函数体内嵌套Run中间件来处理短路请求对象
-                 build.Run(async context =>
-                 {
-                     //异步等待Context完成响应操作
-                     await context.Response.WriteAsync("Hello from test");
-                 });
-             });
+            //app.Map("/test", build =>
+            // {
+            //     //函数体内嵌套Run中间件来处理短路请求对象
+            //     build.Run(async context =>
+            //     {
+            //         //异步等待Context完成响应操作
+            //         await context.Response.WriteAsync("Hello from test");
+            //     });
+            // });
+            #endregion
+
+            //默认路由
+            //app.UseMvcWithDefaultRoute();
+            //自定义路由方法
+
+            //总结：在UseMvc中间件中，制定路由表，并配合控制器中的Routing属性来搭配复杂路由系统
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
+                //{domain}/noodles/list
+            });
 
             //例1：App.Run中间件截获请求对象后，直接向前端输出Hello World
             //任何在App.Run之后的代码不会被执行
